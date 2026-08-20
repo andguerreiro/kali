@@ -1,6 +1,6 @@
 # Kali Linux Labs
 
-## Lab1
+## Lab01
 
 ### Objective
 
