@@ -1,0 +1,426 @@
+LAB QEMU/KVM - DEBIAN 13 + KALI + WINDOWS 7
+============================================================
+
+DATE: 19/08/2026
+
+OBJECTIVE
+---------
+Create an isolated local lab on Debian 13.6 + XFCE,
+using QEMU/KVM, with two virtual machines:
+
+- Kali Linux 2026.2 QEMU AMD64
+- Windows 7 Starter SP1 32-bit
+
+Lab objectives:
+- Kali as the testing machine
+- Windows 7 as the target machine
+- Communication between the VMs
+- No Internet access for the VMs
+- No exposure of the VMs to the host's physical LAN
+
+
+HOST
+----
+Operating system:
+Debian 13.6 (Trixie)
+
+Desktop environment:
+XFCE
+
+User:
+and
+
+Relevant groups:
+libvirt
+kvm
+
+The user "and" was already in the required groups.
+
+
+QEMU/KVM AND LIBVIRT
+--------------------
+Installed packages:
+
+qemu-system
+qemu-utils
+libvirt-daemon-system
+libvirt-clients
+virt-manager
+virt-viewer
+virt-install
+p7zip-full
+
+Virtualization support was configured and access to:
+
+qemu:///system
+
+is working.
+
+Command used to verify the VMs:
+
+virsh -c qemu:///system list --all
+
+
+KALI LINUX
+----------
+Downloaded file:
+
+kali-linux-2026.2-qemu-amd64.7z
+
+Compressed file size:
+approximately 3.7 GB
+
+The file was extracted using 7z.
+
+There was a detail regarding the extraction path:
+the command with "-o~/VMs/Kali" literally created a "~" folder
+inside Downloads.
+
+The file was subsequently located at:
+
+/home/and/Downloads/~/VMs/Kali/kali-linux-2026.2-qemu-amd64.qcow2
+
+The file was moved to:
+
+/home/and/VMs/Kali/kali-linux-2026.2-qemu-amd64.qcow2
+
+
+KALI DISK
+---------
+Format:
+QCOW2
+
+Virtual size:
+80.1 GiB
+
+Initially occupied space:
+approximately 14.9 GiB
+
+qemu-img info result:
+
+file format: qcow2
+virtual size: 80.1 GiB
+disk size: 14.9 GiB
+corrupt: false
+
+
+KALI VM CONFIGURATION
+---------------------
+CPU:
+2 vCPUs initially
+
+RAM:
+4 GB
+
+Disk:
+kali-linux-2026.2-qemu-amd64.qcow2
+
+Network interface:
+VirtIO
+
+MAC:
+52:54:00:45:2c:28
+
+
+LAB NETWORK
+-----------
+A libvirt virtual network named:
+
+lab-isolated
+
+was created.
+
+Mode:
+Isolated
+
+Network:
+10.10.10.0/24
+
+DHCP:
+enabled
+
+The network does NOT have Internet access.
+
+The network is also not bridged to the Debian physical LAN.
+
+The current architecture is:
+
+Debian Host
+    |
+    +-- libvirt/QEMU
+           |
+           +-- lab-isolated
+                  |
+                  +-- Kali
+                  |
+                  +-- Windows 7
+
+
+KALI - NETWORK
+--------------
+Interface:
+
+eth0
+
+IP assigned via DHCP:
+
+10.10.10.119/24
+
+MAC:
+
+52:54:00:45:2c:28
+
+Route:
+
+10.10.10.0/24 dev eth0
+
+There is no default route.
+
+Test performed:
+
+ping -c 3 10.10.10.1
+
+Result:
+3 sent
+3 received
+0% loss
+
+Test performed:
+
+ping -c 3 8.8.8.8
+
+Result:
+
+Network is unreachable
+
+This confirmed that Kali does not have Internet access.
+
+
+WINDOWS 7
+---------
+ISO used:
+
+Win7_Starter_SP1_BrazilianPortuguese_x32.iso
+
+Location:
+
+/home/and/Downloads/Win7_Starter_SP1_BrazilianPortuguese_x32.iso
+
+Size:
+approximately 2.2 GB
+
+The ISO is Windows 7 Starter SP1 32-bit.
+
+
+WINDOWS 7 VM CONFIGURATION
+--------------------------
+Name:
+
+Win7-Lab
+
+RAM:
+2 GB
+
+CPU:
+2 vCPUs
+
+Disk:
+40 GB
+
+Disk bus:
+SATA
+
+Firmware:
+BIOS/SeaBIOS
+
+Network interface:
+e1000
+
+Network:
+
+lab-isolated
+
+
+WINDOWS INSTALLATION
+--------------------
+The installer correctly recognized:
+
+Disk 0 Unallocated Space
+40.0 GB
+
+Windows was installed normally.
+
+During the initial network configuration, the following was selected:
+
+Public network
+
+This was chosen because it is a lab environment and keeps
+a more restrictive network profile.
+
+
+WINDOWS 7 - NETWORK
+-------------------
+Windows received via DHCP:
+
+10.10.10.175
+
+The network is working.
+
+Windows -> Kali test:
+
+ping 10.10.10.119
+
+Result:
+4 sent
+4 received
+
+
+Initially, the Kali -> Windows test did not work because
+Windows Firewall was blocking incoming ICMP Echo Requests.
+
+The ICMP Echo Request rule was enabled in the Windows firewall.
+
+After that:
+
+Kali -> Windows:
+
+ping -c 4 10.10.10.175
+
+Result:
+
+4 packets transmitted
+4 received
+0% packet loss
+
+
+LAYER 2 CONFIRMATION
+--------------------
+On Kali, the following was executed:
+
+ip neigh
+
+Relevant result:
+
+10.10.10.175 dev eth0 lladdr 52:54:00:8b:9d:94 STALE
+
+This confirmed that Kali can resolve the Windows MAC address
+through the virtual network.
+
+Windows interface MAC:
+
+52:54:00:8b:9d:94
+
+
+ISOLATION
+---------
+Kali -> Internet:
+
+ping 8.8.8.8
+
+Result:
+
+Network is unreachable
+
+Windows 7 -> Internet:
+
+No response.
+
+Conclusion:
+the VMs can communicate with each other, but they do not have Internet access.
+
+The Debian physical network is not being used directly by the VMs.
+
+
+FINAL TOPOLOGY
+--------------
+                    DEBIAN 13.6
+                     XFCE HOST
+                         |
+                     QEMU/KVM
+                         |
+                 lab-isolated
+                10.10.10.0/24
+                    /       \
+                   /         \
+                  /           \
+              KALI           WIN7
+         10.10.10.119    10.10.10.175
+             eth0             e1000
+              |                 |
+              +-------+---------+
+                      |
+                 local
+                communication
+
+Internet
+   X
+   |
+lab-isolated
+
+
+WINDOWS SNAPSHOT
+----------------
+A snapshot of Windows 7 was created after the installation and
+basic network configuration.
+
+Name:
+
+win7-clean-install
+
+Objective:
+preserve a clean state of Windows before starting the tests.
+
+The snapshot was created with the VM powered off.
+
+Selected type:
+
+Internal
+
+IMPORTANT:
+a snapshot is not a backup. It is a convenient restore point for
+the lab.
+
+
+COPY/PASTE
+----------
+It was decided not to configure copy/paste integration between the
+Debian host and Windows 7.
+
+The VM will continue using the virt-manager console normally.
+
+If necessary in the future, files can be transferred through
+the isolated network between Kali and Windows.
+
+
+STATE AT THE END OF THE LAB
+---------------------------
+Kali:
+IP 10.10.10.119
+Network lab-isolated
+No Internet
+Communication with Windows working
+
+Windows 7:
+IP 10.10.10.175
+Network lab-isolated
+No Internet
+Communication with Kali working
+Firewall active
+Snapshot "win7-clean-install" created
+
+
+NEXT STEP
+---------
+Start testing from Kali against Windows 7.
+
+Before the tests:
+- keep the VMs on the lab-isolated network;
+- do not add a bridge to the physical LAN;
+- do not add Internet access to Windows;
+- keep the win7-clean-install snapshot as a restore point;
+- create additional snapshots before important changes.
+
+From Kali, the next task will be to identify the services
+exposed by Windows 7 on the 10.10.10.0/24 network and study the
+vulnerabilities present in the system within this controlled
+environment.
