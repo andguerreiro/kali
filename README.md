@@ -6,7 +6,7 @@
 
 ## lab02
 
-**Objective:** Conduct the first penetration-testing session from an offline Kali Linux attack machine against an isolated Windows 7 target with all firewall rules off. The lab confirms that the target exposes vulnerable SMBv1 (MS17-010) and resolves a missing mysmb.py dependency via the Debian host, though initial exploitation failed due to an inaccessible named pipe.
+**Objective:** Complete the exploitation and post-exploitation phase of an isolated local lab (Debian 13 host running QEMU/KVM) against a Windows 7 target, with all firewall rules off, using valid credentials, architecture identification, and Metasploit to obtain system-level access and verify interactive controls.
 
 ## Host
 Debian 13, Xfce 
