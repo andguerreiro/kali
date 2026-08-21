@@ -8,6 +8,10 @@
 
 **Objective:** Complete the exploitation and post-exploitation phase of an isolated local lab (Debian 13 host running QEMU/KVM) against a Windows 7 target, with all firewall rules off, using valid credentials, architecture identification, and Metasploit to obtain system-level access and verify interactive controls.
 
+## lab03
+
+**Objective:** Create an isolated Windows 7 Professional SP1 x64 virtual machine on the existing lab-isolated network, verify connectivity from Kali Linux, enumerate exposed RPC, NetBIOS, SMB, and dynamic RPC services, and identify the known MS17-010 / CVE-2017-0143 SMBv1 remote code execution vulnerability.
+
 ## Host
 Debian 13, Xfce 
 
