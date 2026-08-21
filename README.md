@@ -13,7 +13,10 @@
 **Objective:** Create an isolated Windows 7 Professional SP1 x64 virtual machine on the existing lab-isolated network, verify connectivity from Kali Linux, enumerate exposed RPC, NetBIOS, SMB, and dynamic RPC services, and identify the known MS17-010 / CVE-2017-0143 SMBv1 remote code execution vulnerability.
 
 ## Host
-Debian 13, Xfce 
+Debian 13 + Xfce
+
+## Guests
+Kali, Win7
 
 ## Hardware
 5700X, RX 7600, 16GB DDR4, 512GB KC3000, CF-WU785AC
